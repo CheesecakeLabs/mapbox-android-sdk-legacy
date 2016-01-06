@@ -23,6 +23,12 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
     private MapView view;
     private Context context;
 
+    protected List<ClusterMarker> mClusterList;
+
+    public void addCluster(ClusterMarker cluster) {
+        mClusterList.add(cluster);
+    }
+
     public ItemizedIconOverlay(final Context pContext, final List<Marker> pList,
                                final com.mapbox.mapboxsdk.overlay.ItemizedIconOverlay.OnItemGestureListener<Marker> pOnItemGestureListener) {
         this(pContext, pList, pOnItemGestureListener, false);
@@ -35,6 +41,7 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
         super();
         this.context = pContext;
         this.mItemList = pList;
+        this.mClusterList = new ArrayList<>();
         this.mOnItemGestureListener = pOnItemGestureListener;
         if (sortList) {
             sortListByLatitude();
@@ -95,15 +102,28 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
         final Projection projection = mapView.getProjection();
         final float x = event.getX();
         final float y = event.getY();
+
+        if (mClusterList != null) {
+            for (int i = 0; i < this.mClusterList.size(); ++i) {
+                final ClusterMarker item = this.mClusterList.get(i);
+                if (markerHitTest(item, projection, x, y)) {
+                    if (task.run(i, true)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < this.mItemList.size(); ++i) {
             final Marker item = getItem(i);
             if (markerHitTest(item, projection, x, y)) {
-                if (task.run(i)) {
+                if (task.run(i, false)) {
                     this.setFocus(item);
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -185,12 +205,16 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
     public boolean onSingleTapConfirmed(final MotionEvent event, final MapView mapView) {
         return (activateSelectedItems(event, mapView, new ActiveItem() {
             @Override
-            public boolean run(final int index) {
+            public boolean run(final int index, boolean isCluster) {
                 final ItemizedIconOverlay that = ItemizedIconOverlay.this;
                 if (that.mOnItemGestureListener == null) {
                     return false;
                 }
-                return onSingleTapUpHelper(index, that.mItemList.get(index), mapView);
+                if (isCluster) {
+                    return onSingleTapUpHelper(index, that.mClusterList.get(index), mapView);
+                } else {
+                    return onSingleTapUpHelper(index, that.mItemList.get(index), mapView);
+                }
             }
         }));
     }
@@ -204,7 +228,7 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
     public boolean onLongPress(final MotionEvent event, final MapView mapView) {
         return (activateSelectedItems(event, mapView, new ActiveItem() {
             @Override
-            public boolean run(final int index) {
+            public boolean run(final int index, boolean isCluster) {
                 final ItemizedIconOverlay that = ItemizedIconOverlay.this;
                 if (that.mOnItemGestureListener == null) {
                     return false;
@@ -260,6 +284,6 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
     }
 
     public static interface ActiveItem {
-        public boolean run(final int aIndex);
+        public boolean run(final int aIndex, boolean isCluster);
     }
 }
