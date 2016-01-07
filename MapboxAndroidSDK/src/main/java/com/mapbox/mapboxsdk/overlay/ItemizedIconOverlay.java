@@ -84,11 +84,12 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
         return result;
     }
 
-//    public void addItem(final int location, final Marker item) {
-//        item.setParentHolder(this);
-//        mItemList.add(location, item);
-//        populate();
-//    }
+    public boolean addItem(final Marker item, int position) {
+        item.setParentHolder(this);
+        mItemList.add(position, item);
+        populate();
+        return true;
+    }
 
     /**
      * When a content sensitive action is performed the content item needs to be identified. This
