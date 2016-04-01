@@ -144,7 +144,10 @@ public abstract class ItemizedOverlay extends SafeDrawOverlay implements Overlay
                 if (item == mFocusedItem) {
                     continue;
                 }
-                onDrawItem(canvas, item, pj, mapView.getMapOrientation(), bounds, mapScale);
+
+                if (item != null) {
+                    onDrawItem(canvas, item, pj, mapView.getMapOrientation(), bounds, mapScale);
+                }
             }
 
             if (mFocusedItem != null) {
@@ -194,7 +197,7 @@ public abstract class ItemizedOverlay extends SafeDrawOverlay implements Overlay
      * @return the Item of the given index.
      */
     public final Marker getItem(final int position) {
-        return mInternalItemList.get(position);
+        return mInternalItemList != null && mInternalItemList.size() > position ? mInternalItemList.get(position) : null;
     }
 
     /**
@@ -266,7 +269,7 @@ public abstract class ItemizedOverlay extends SafeDrawOverlay implements Overlay
 
         for (int i = 0; i < size; i++) {
             final Marker item = getItem(i);
-            if (markerHitTest(item, projection, x, y)) {
+            if (item != null && markerHitTest(item, projection, x, y)) {
                 // We have a hit, do we get a response from onTap?
                 if (onTap(i)) {
                     // We got a response so consume the event

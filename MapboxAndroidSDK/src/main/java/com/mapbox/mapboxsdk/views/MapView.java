@@ -505,7 +505,10 @@ public class MapView extends ViewGroup implements MapViewConstants, MapEventsRec
             // Make sure Markers are added to MapView
             ItemizedIconOverlay overlay = (ItemizedIconOverlay) itemizedOverlay;
             for (int lc = 0; lc < overlay.size(); lc++) {
-                overlay.getItem(lc).addTo(this);
+                final Marker item = overlay.getItem(lc);
+                if (item != null) {
+                    item.addTo(this);
+                }
             }
         }
 

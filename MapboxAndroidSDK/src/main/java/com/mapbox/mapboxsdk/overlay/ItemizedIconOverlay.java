@@ -117,7 +117,7 @@ public class ItemizedIconOverlay extends ItemizedOverlay {
 
         for (int i = 0; i < this.mItemList.size(); ++i) {
             final Marker item = getItem(i);
-            if (markerHitTest(item, projection, x, y)) {
+            if (item != null && markerHitTest(item, projection, x, y)) {
                 if (task.run(i, false)) {
                     this.setFocus(item);
                     return true;
